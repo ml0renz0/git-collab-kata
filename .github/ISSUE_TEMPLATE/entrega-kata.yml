@@ -1,0 +1,472 @@
+name: "Entrega Kata Git Colab"
+description: "Entrega la kata mediante un issue con respuestas tipo test y tu rama principal."
+title: "Entrega Kata Git Colab - <username>"
+labels:
+  - entrega
+  - kata
+  - cuestionario
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por completar la kata. Crea un issue de entrega al final del kata con tu rama principal y las respuestas del cuestionario.
+
+        Los PRs se pueden trazar filtrando por la rama destino, por ejemplo `is:pr base:main-anapascual`.
+
+        Nota: los issues de GitHub son visibles para las personas con acceso al repositorio. Si el cuestionario debe ser privado o evaluable, entrégalo por el canal indicado por el instructor.
+  - type: input
+    id: main-branch
+    attributes:
+      label: "Rama principal de trabajo"
+      description: "Nombre de tu rama principal personal. Los PRs del kata deben haberse abierto contra esta rama."
+      placeholder: "main-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q1a
+    attributes:
+      label: "Ejercicio 1A: ¿Qué comando usaste para seleccionar solo parte del cambio?"
+      options:
+        - "git add -A"
+        - "git diff --staged"
+        - "git add -p"
+        - "git commit --amend"
+    validations:
+      required: true
+  - type: dropdown
+    id: q1b
+    attributes:
+      label: "Ejercicio 1A: Si quieres recuperar el cambio del debug sin sacarlo del stash, ¿qué comando usas?"
+      options:
+        - "git stash save"
+        - "git stash drop"
+        - "git stash apply"
+        - "git stash pop"
+    validations:
+      required: true
+  - type: dropdown
+    id: q1c
+    attributes:
+      label: "Ejercicio 1A: ¿Qué comando usaste para combinar el commit del test con el commit de la función?"
+      options:
+        - "git commit --amend"
+        - "git rebase -i HEAD~3"
+        - "git merge --squash"
+        - "git rebase -i HEAD~2"
+    validations:
+      required: true
+  - type: dropdown
+    id: q1d
+    attributes:
+      label: "Ejercicio 1B: ¿Qué comando se usa para combinar el commit de fix con el commit original?"
+      options:
+        - "git merge --squash"
+        - "git cherry-pick HEAD~2"
+        - "git rebase -i HEAD~3"
+        - "git revert HEAD~1"
+    validations:
+      required: true
+  - type: dropdown
+    id: q1e
+    attributes:
+      label: "Ejercicio 1B: Después del rebase interactivo, ¿qué comando usaste para actualizar la rama remota de forma segura?"
+      options:
+        - "git push origin main-<username>"
+        - "git push --set-upstream"
+        - "git push -f"
+        - "git push --force-with-lease"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2a
+    attributes:
+      label: "Ejercicio 2A: ¿Qué hace `git push -u origin \"$FEATURE_DIVIDE\"`?"
+      options:
+        - "Solo empuja commits locales"
+        - "Crea un tag en origin"
+        - "Empuja la rama y configura upstream"
+        - "Reescribe el historial remoto"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2b
+    attributes:
+      label: "Ejercicio 2A: ¿Por qué se crean las ramas de `divide` y `modulus` antes de implementar nada?"
+      options:
+        - "Para evitar tener que hacer commits"
+        - "Para que GitHub cree dos repositorios distintos"
+        - "Para que `pytest` se ejecute automáticamente"
+        - "Para que partan de la misma base y `modulus` quede desactualizada tras integrar `divide`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2c
+    attributes:
+      label: "Ejercicio 2B: ¿Qué comando usaste para actualizar la rama de `modulus` con los cambios ya integrados en `$MAIN`?"
+      options:
+        - "git merge main"
+        - "git push -u origin \"$FEATURE_MODULUS\""
+        - "git rebase \"origin/$MAIN\""
+        - "git pull"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2d
+    attributes:
+      label: "Ejercicio 2B: Al resolver el conflicto, ¿qué cambios deben conservarse?"
+      options:
+        - "Solo `divide` y `test_divide`"
+        - "`divide`, `modulus`, `test_divide` y `test_modulus`"
+        - "Solo los cambios de `origin/$MAIN`"
+        - "Solo `modulus` y `test_modulus`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2e
+    attributes:
+      label: "Ejercicio 2B: ¿Qué comando trae los cambios del remoto sin modificar todavía tu rama actual?"
+      options:
+        - "git pull"
+        - "git fetch origin"
+        - "git rebase --continue"
+        - "git branch -vv"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2f
+    attributes:
+      label: "Ejercicio 2B: Después de resolver conflictos y hacer `git add`, ¿qué comando continúa el rebase?"
+      options:
+        - "git rebase --abort"
+        - "git merge --continue"
+        - "git rebase --continue"
+        - "git commit --amend"
+    validations:
+      required: true
+  - type: dropdown
+    id: q2g
+    attributes:
+      label: "Ejercicio 2B: Tras rebasear una rama que ya habías subido, ¿qué comando actualiza el remoto de forma segura?"
+      options:
+        - "git push origin main"
+        - "git push --set-upstream"
+        - "git push --force-with-lease"
+        - "git pull --ff-only"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3a
+    attributes:
+      label: "Ejercicio 3A: ¿Qué nombre base debe mantener la rama del hotfix?"
+      options:
+        - "feature/division-by-zero-<username>"
+        - "hotfix/division-by-zero-<username>"
+        - "fix/division-by-zero-<username>"
+        - "hotfix/add-none-validation-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3b
+    attributes:
+      label: "Ejercicio 3A: ¿Qué comando crea y cambia a la rama `$HOTFIX`?"
+      options:
+        - "git switch \"$HOTFIX\""
+        - "git branch \"$HOTFIX\""
+        - "git switch -c \"$HOTFIX\""
+        - "git checkout main"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3c
+    attributes:
+      label: "Ejercicio 3A: Antes de commitear, ¿qué comando muestra los cambios todavía sin stage?"
+      options:
+        - "git log --oneline"
+        - "git branch -vv"
+        - "git diff --staged"
+        - "git diff"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3d
+    attributes:
+      label: "Ejercicio 3A: ¿Qué comando sube el hotfix y configura upstream?"
+      options:
+        - "git push -u origin \"$HOTFIX\""
+        - "git pull --ff-only"
+        - "git push --force-with-lease"
+        - "git fetch origin"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3e
+    attributes:
+      label: "Ejercicio 3A: Tras combinar el PR del hotfix, ¿cómo actualizas tu rama local `$MAIN`?"
+      options:
+        - "git switch \"$MAIN\" y git pull"
+        - "git fetch origin y git rebase --continue"
+        - "git switch \"$MAIN\" y git pull --ff-only"
+        - "git push -u origin \"$MAIN\""
+    validations:
+      required: true
+  - type: dropdown
+    id: q3f
+    attributes:
+      label: "Ejercicio 3B: ¿Qué comando trae cambios del remoto sin modificar todavía tu rama actual?"
+      options:
+        - "git pull"
+        - "git rebase \"origin/$MAIN\""
+        - "git merge \"$MAIN\""
+        - "git fetch origin"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3g
+    attributes:
+      label: "Ejercicio 3B: ¿Qué comando actualiza la rama de Persona B con lo ya integrado en `$MAIN`?"
+      options:
+        - "git merge main"
+        - "git rebase \"origin/$MAIN\""
+        - "git push -u origin \"$FEATURE_NONE\""
+        - "git branch -vv"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3h
+    attributes:
+      label: "Ejercicio 3B: Después de resolver conflictos y hacer `git add`, ¿qué comando continúa el rebase?"
+      options:
+        - "git rebase --continue"
+        - "git rebase --abort"
+        - "git commit --amend"
+        - "git merge --continue"
+    validations:
+      required: true
+  - type: dropdown
+    id: q3i
+    attributes:
+      label: "Ejercicio 3B: Al resolver el conflicto manual en `add`, ¿qué debe conservarse?"
+      options:
+        - "Solo el casteo a `int`, eliminando la validación de `None`"
+        - "Solo la validación de `None`, eliminando el test de casteo"
+        - "El rechazo de `None`, el casteo a `int` y los tests de ambas ramas"
+        - "Solo los cambios de la rama que entró primero"
+    validations:
+      required: true
+  - type: dropdown
+    id: q4a
+    attributes:
+      label: "Ejercicio 4A: ¿Cuál debe ser el resultado final de `feature/clean-history-<username>`?"
+      options:
+        - "Tres commits sobre `main`, incluyendo `wip`"
+        - "Una rama local sin commits"
+        - "Un merge commit contra `main`"
+        - "Un solo commit útil sobre `main-<username>`, con `docs/usage.md` y sin `temp.txt`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q4b
+    attributes:
+      label: "Ejercicio 4B: ¿Qué comando te permite combinar los tres commits de `docs/squash.md` antes del PR?"
+      options:
+        - "git rebase -i \"$MAIN\""
+        - "git pull --ff-only"
+        - "git branch -vv"
+        - "git restore --staged docs/squash.md"
+    validations:
+      required: true
+  - type: dropdown
+    id: q4c
+    attributes:
+      label: "Ejercicio 4B: ¿Qué hace `git rebase -i --autosquash \"$MAIN\"`?"
+      options:
+        - "Hace un merge fast-forward"
+        - "Reordena y combina commits fixup automáticamente"
+        - "Resetea el árbol de trabajo a main"
+        - "Crea un tag de release"
+    validations:
+      required: true
+  - type: dropdown
+    id: q4d
+    attributes:
+      label: "Ejercicio 4B: Si ya habías subido la rama y después haces rebase interactivo, ¿cómo actualizas el remoto de forma segura?"
+      options:
+        - "git push origin main"
+        - "git pull"
+        - "git push --force-with-lease"
+        - "git fetch origin"
+    validations:
+      required: true
+  - type: dropdown
+    id: q5a
+    attributes:
+      label: "Ejercicio 5A: Si añadiste `debug.conf` al stage por error, ¿qué comando lo saca del stage sin borrar el archivo?"
+      options:
+        - "git restore --staged debug.conf"
+        - "git reset --hard HEAD~1"
+        - "git revert debug.conf"
+        - "git checkout main -- debug.conf"
+    validations:
+      required: true
+  - type: dropdown
+    id: q5b
+    attributes:
+      label: "Ejercicio 5A: Si borraste `app/calculator.py` sin commitear, ¿qué comando lo recupera desde HEAD?"
+      options:
+        - "git add app/calculator.py"
+        - "git restore app/calculator.py"
+        - "git reflog app/calculator.py"
+        - "git push --force-with-lease"
+    validations:
+      required: true
+  - type: dropdown
+    id: q5c
+    attributes:
+      label: "Ejercicio 5B: ¿Para qué sirve `git reflog`?"
+      options:
+        - "Mostrar únicamente los cambios staged"
+        - "Crear automáticamente una pull request"
+        - "Eliminar un commit remoto"
+        - "Ver el historial de referencias para recuperar commits"
+    validations:
+      required: true
+  - type: dropdown
+    id: q5d
+    attributes:
+      label: "Ejercicio 5B: ¿Por qué usar `git revert` en historial compartido?"
+      options:
+        - "Porque borra el commit original de todas las copias"
+        - "Porque crea un nuevo commit que deshace otro sin reescribir la historia"
+        - "Porque mueve `$MAIN` a un commit anterior"
+        - "Porque evita tener que ejecutar tests"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6a
+    attributes:
+      label: "Ejercicio 6A: ¿Qué rama base debe mantener el PR pequeño?"
+      options:
+        - "feature/review-cleanup-<username>"
+        - "chore/pr-template-<username>"
+        - "feature/<algo-pequeno>"
+        - "feature/pr-template-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6b
+    attributes:
+      label: "Ejercicio 6A: ¿Qué apartados debe incluir la descripción de PR propuesta?"
+      options:
+        - "Qué cambia, Por qué, Cómo se ha probado, Riesgos"
+        - "Resumen, Deploy, Owner"
+        - "Branch, Tag, Release"
+        - "Archivo, Línea, Commit"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6c
+    attributes:
+      label: "Ejercicio 6A: ¿Cuál es el límite de tamaño del PR de demo?"
+      options:
+        - "Un máximo de 8 archivos, como el workflow general"
+        - "Sin límite si solo cambia documentación"
+        - "Como máximo 3 archivos"
+        - "Exactamente 3 commits"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6d
+    attributes:
+      label: "Ejercicio 6B: ¿Qué tres cosas debe pedir la review cruzada?"
+      options:
+        - "Un tag, una release y un merge commit"
+        - "Un cambio funcional, un cambio de naming y una pregunta de diseño"
+        - "Un reset hard, un reflog y un revert"
+        - "Un cambio secreto, un archivo local y un token"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6e
+    attributes:
+      label: "Ejercicio 6B: Después de limpiar una rama ya publicada con rebase, ¿cómo actualizas el remoto de forma segura?"
+      options:
+        - "git push origin main"
+        - "git pull --ff-only"
+        - "git push -f"
+        - "git push --force-with-lease"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6f
+    attributes:
+      label: "Ejercicio 6B: ¿Cómo debe quedar el historial final antes del merge?"
+      options:
+        - "Un solo commit claro, sin `Address review comments`"
+        - "Dos commits: el borrador y `Address review comments`"
+        - "Un commit `wip` para que la review sea más rápida"
+        - "Un merge commit desde `main`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7a
+    attributes:
+      label: "Ejercicio 7A: ¿Qué rama usa Persona A para la feature funcional?"
+      options:
+        - "hotfix/division-by-zero-<username>"
+        - "refactor/calculator-names-<username>"
+        - "feature/tax-calculation-<username>"
+        - "main-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7b
+    attributes:
+      label: "Ejercicio 7A: Tras integrar el hotfix, ¿cómo actualiza Persona A su feature antes del merge?"
+      options:
+        - "Trae cambios con `git fetch origin` y ejecuta `git rebase \"origin/$MAIN\"`"
+        - "Hace `git reset --hard origin/main`"
+        - "Abre un PR nuevo contra `main`"
+        - "Crea directamente el tag `v1.0.0`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7c
+    attributes:
+      label: "Ejercicio 7B: Al resolver la integración final, ¿qué debe conservarse?"
+      options:
+        - "Solo el refactor, porque la feature se puede rehacer después"
+        - "Solo los cambios de la rama que entró primero"
+        - "El tag de release, aunque fallen los tests"
+        - "`calculate_tax`, el hotfix de división por cero, los nombres `left`/`right` y los tests"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7d
+    attributes:
+      label: "Ejercicio 7B: ¿Para qué sirve el tag anotado de release?"
+      options:
+        - "Para reemplazar la rama de feature"
+        - "Para marcar un punto concreto de `$MAIN` como versión publicada"
+        - "Para resolver conflictos automáticamente"
+        - "Para borrar los commits temporales del historial"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7e
+    attributes:
+      label: "Ejercicio 7B: ¿Por qué usar `git revert <commit>` en un historial compartido?"
+      options:
+        - "Porque fusiona la rama actual con `main`"
+        - "Porque borra el commit original de todas las copias"
+        - "Porque crea un nuevo commit que deshace otro sin reescribir la historia"
+        - "Porque mueve HEAD a un commit anterior sin guardar cambios"
+    validations:
+      required: true
+  - type: textarea
+    id: learning
+    attributes:
+      label: "Aprendizaje clave"
+      description: "Describe brevemente qué aprendiste en la kata."
+      placeholder: "Aprendí que..."
+    validations:
+      required: true

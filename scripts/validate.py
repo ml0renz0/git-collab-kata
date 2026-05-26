@@ -40,6 +40,50 @@ def current_branch() -> str:
     return result.stdout.strip()
 
 
+def ref_exists(ref: str) -> bool:
+    result = run(["git", "rev-parse", "--verify", "--quiet", ref], check=False)
+    return result.returncode == 0
+
+
+def exercise_branch_base(branch: str) -> str | None:
+    for expected_branch in EXERCISE_VALIDATORS:
+        if branch == expected_branch:
+            return expected_branch
+        if branch.startswith(f"{expected_branch}-"):
+            return expected_branch
+    return None
+
+
+def user_suffix(branch: str) -> str | None:
+    expected_branch = exercise_branch_base(branch)
+    if expected_branch is None or branch == expected_branch:
+        return None
+    return branch.removeprefix(f"{expected_branch}-")
+
+
+def base_candidates(branch: str | None = None) -> list[str]:
+    branch = branch or current_branch()
+    candidates: list[str] = []
+
+    github_base = os.getenv("GITHUB_BASE_REF")
+    if github_base:
+        candidates.extend([f"origin/{github_base}", github_base])
+
+    suffix = user_suffix(branch)
+    if suffix:
+        candidates.extend([f"origin/main-{suffix}", f"main-{suffix}"])
+
+    candidates.extend(["origin/main", "main"])
+    return candidates
+
+
+def first_existing_base(branch: str | None = None) -> str:
+    for candidate in base_candidates(branch):
+        if ref_exists(candidate):
+            return candidate
+    fail(f"Could not find a base branch. Tried: {base_candidates(branch)}")
+
+
 def tracked_files() -> list[str]:
     return run(["git", "ls-files"]).stdout.splitlines()
 
@@ -60,11 +104,27 @@ def function_names(path: str) -> set[str]:
     return {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
 
 
+def function_arg_names(path: str, name: str) -> list[str]:
+    tree = parse_module(path)
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            args = [*node.args.posonlyargs, *node.args.args]
+            return [arg.arg for arg in args]
+    fail(f"Expected function {name!r} in {path}")
+
+
 def assert_function(path: str, name: str) -> None:
     names = function_names(path)
     if name not in names:
         fail(f"Expected function {name!r} in {path}. Found: {sorted(names)}")
     ok(f"Function {name!r} exists in {path}")
+
+
+def assert_function_args(path: str, name: str, expected: list[str]) -> None:
+    actual = function_arg_names(path, name)
+    if actual[: len(expected)] != expected:
+        fail(f"Expected {name} arguments to start with {expected}, found {actual}")
+    ok(f"Function {name!r} uses expected argument names")
 
 
 def assert_no_text(path: str, pattern: str, description: str) -> None:
@@ -86,6 +146,13 @@ def assert_file_absent(path: str) -> None:
     ok(f"File absent: {path}")
 
 
+def assert_file_contains(path: str, pattern: str, description: str) -> None:
+    content = read(path)
+    if not re.search(pattern, content, re.IGNORECASE | re.DOTALL):
+        fail(description)
+    ok(description.replace("Expected", "Found"))
+
+
 def assert_test_contains(test_name: str) -> None:
     tests = "\n".join(read(p) for p in tracked_files() if p.startswith("tests/") and p.endswith(".py"))
     if test_name not in tests:
@@ -93,21 +160,99 @@ def assert_test_contains(test_name: str) -> None:
     ok(f"Tests reference {test_name!r}")
 
 
-def commit_messages_since_base(base: str = "origin/main") -> list[str]:
-    result = run(["git", "log", "--format=%s", f"{base}..HEAD"], check=False)
+def assert_test_function(name: str, required_text: str | None = None) -> None:
+    test_files = [p for p in tracked_files() if p.startswith("tests/") and p.endswith(".py")]
+    for path in test_files:
+        tree = parse_module(path)
+        for node in tree.body:
+            if not isinstance(node, ast.FunctionDef) or node.name != name:
+                continue
+            if required_text is not None:
+                references = any(
+                    isinstance(child, ast.Name) and child.id == required_text
+                    or isinstance(child, ast.Attribute) and child.attr == required_text
+                    for child in ast.walk(node)
+                )
+                if not references:
+                    fail(f"Expected test {name!r} to exercise {required_text!r}")
+            ok(f"Test function {name!r} exists")
+            return
+    fail(f"Expected test function {name!r} in tests/")
+
+
+def assert_python_result(expression: str, expected: str) -> None:
+    result = run([sys.executable, "-c", f"from app.calculator import *; print({expression})"], check=False)
+    actual = result.stdout.strip()
+    if result.returncode != 0 or actual != expected:
+        detail = result.stderr.strip() or actual or f"exit code {result.returncode}"
+        fail(f"Expected {expression} to print {expected!r}; got {detail!r}")
+    ok(f"{expression} returns {expected}")
+
+
+def assert_python_raises(expression: str, expected_exception: str) -> None:
+    code = f"""
+from app.calculator import *
+
+try:
+    {expression}
+except {expected_exception}:
+    pass
+else:
+    raise AssertionError("Expected {expected_exception}")
+"""
+    result = run([sys.executable, "-c", code], check=False)
     if result.returncode != 0:
-        result = run(["git", "log", "--format=%s", "main..HEAD"], check=False)
+        detail = result.stderr.strip() or result.stdout.strip() or f"exit code {result.returncode}"
+        fail(f"Expected {expression} to raise {expected_exception}; got {detail!r}")
+    ok(f"{expression} raises {expected_exception}")
+
+
+def assert_tests_match(pattern: str, description: str) -> None:
+    tests = "\n".join(read(p) for p in tracked_files() if p.startswith("tests/") and p.endswith(".py"))
+    if not re.search(pattern, tests, re.IGNORECASE | re.DOTALL):
+        fail(description)
+    ok(description.replace("Expected", "Found"))
+
+
+def commit_messages_since_base(base: str | None = None) -> list[str]:
+    base = base or first_existing_base()
+    result = run(["git", "log", "--format=%s", f"{base}..HEAD"], check=False)
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
-def commit_count_since_base(base: str = "origin/main") -> int:
+def commit_count_since_base(base: str | None = None) -> int:
+    base = base or first_existing_base()
     result = run(["git", "rev-list", "--count", f"{base}..HEAD"], check=False)
-    if result.returncode != 0:
-        result = run(["git", "rev-list", "--count", "main..HEAD"], check=False)
     try:
         return int(result.stdout.strip())
     except ValueError:
         return 0
+
+
+def changed_files_since_base(base: str | None = None) -> list[str]:
+    base = base or first_existing_base()
+    result = run(["git", "diff", "--name-only", f"{base}...HEAD"], check=False)
+    if result.returncode != 0:
+        result = run(["git", "diff", "--name-only", f"{base}..HEAD"], check=False)
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def assert_max_changed_files(max_files: int) -> None:
+    changed_files = changed_files_since_base()
+    if len(changed_files) > max_files:
+        fail(
+            f"Expected at most {max_files} changed files in the PR, "
+            f"found {len(changed_files)}: {changed_files}"
+        )
+    ok(f"PR changes at most {max_files} files")
+
+
+def assert_commit_messages_absent(pattern: str, description: str) -> None:
+    messages = commit_messages_since_base()
+    offenders = [message for message in messages if re.search(pattern, message, re.IGNORECASE)]
+    if offenders:
+        fail(f"{description}: {offenders}")
+    ok(description)
 
 
 def generic_checks() -> None:
@@ -140,22 +285,51 @@ def generic_checks() -> None:
 
 def validate_multiply() -> None:
     assert_function("app/calculator.py", "multiply")
-    assert_test_contains("multiply")
+    assert_test_function("test_multiply", "multiply")
+    assert_python_result("multiply(2, 3)", "6")
     assert_no_text("app/calculator.py", r"print\(", "calculator.py must not contain debug print calls")
 
 
 def validate_divide() -> None:
     assert_function("app/calculator.py", "divide")
-    assert_test_contains("divide")
+    assert_test_function("test_divide", "divide")
+    assert_python_result("divide(10, 2)", "5.0")
+
+
+def validate_modulus() -> None:
+    assert_function("app/calculator.py", "divide")
+    assert_function("app/calculator.py", "modulus")
+    assert_test_function("test_divide", "divide")
+    assert_test_function("test_modulus", "modulus")
+    assert_python_result("divide(10, 2)", "5.0")
+    assert_python_result("modulus(10, 3)", "1")
+
+
+def validate_exponentiation() -> None:
+    assert_function("app/calculator.py", "exponentiation")
+    assert_test_function("test_exponentiation", "exponentiation")
+    assert_python_result("exponentiation(2, 3)", "8")
+    assert_no_text("app/calculator.py", r"print\(", "calculator.py must not contain debug print calls")
 
 
 def validate_division_by_zero() -> None:
     assert_function("app/calculator.py", "divide")
-    code = read("app/calculator.py")
-    if "ZeroDivisionError" not in code and "ValueError" not in code:
-        fail("divide should explicitly handle division by zero with a clear exception")
-    ok("divide handles division by zero explicitly")
-    assert_test_contains("zero")
+    assert_python_result("divide(10, 2)", "5.0")
+    assert_python_raises("divide(10, 0)", "ZeroDivisionError")
+    assert_tests_match(r"zero", "Expected tests to cover division by zero")
+
+
+def validate_add_cast_int() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_python_result("add('2', '3')", "5")
+    assert_tests_match(r"add\s*\(\s*['\"]2['\"]\s*,\s*['\"]3['\"]\s*\)", "Expected tests to cover add casting string inputs")
+
+
+def validate_add_none_validation() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_python_result("add('2', '3')", "5")
+    assert_python_raises("add(None, 3)", "ValueError")
+    assert_tests_match(r"add\s*\(\s*None\s*,\s*3\s*\)", "Expected tests to cover add rejecting None")
 
 
 def validate_clean_history() -> None:
@@ -183,27 +357,161 @@ def validate_fixup_demo() -> None:
     ok("Fixup demo branch contains exactly one commit over main")
 
 
+def validate_recovery_sandbox() -> None:
+    assert_file_exists("app/calculator.py")
+    assert_file_exists("docs/recovery.md")
+    assert_file_contains("docs/recovery.md", r"restore", "Expected docs/recovery.md to mention restore")
+    assert_file_contains("docs/recovery.md", r"staged?", "Expected docs/recovery.md to mention staged")
+    assert_file_absent("debug.conf")
+
+
+def validate_reflog_rescue() -> None:
+    assert_file_exists("important.txt")
+    assert_file_contains("important.txt", r"important", "Expected important.txt to contain important")
+
+
+def validate_revert_demo() -> None:
+    assert_file_absent("production.txt")
+    count = commit_count_since_base()
+    if count < 2:
+        fail(f"Expected revert demo branch to contain at least 2 commits over main, found {count}")
+    ok("Revert demo branch contains at least two commits over main")
+    messages = commit_messages_since_base()
+    if not any(re.search(r"\brevert\b", message, re.IGNORECASE) for message in messages):
+        fail(f"Expected at least one revert commit message, found: {messages}")
+    ok("Revert commit message found")
+
+
+def validate_pr_template() -> None:
+    assert_file_exists("docs/pr-template.md")
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Qu[eé]\s+cambia",
+        "Expected docs/pr-template.md to include Qué cambia",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Por\s+qu[eé]",
+        "Expected docs/pr-template.md to include Por qué",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+C[oó]mo\s+se\s+ha\s+probado",
+        "Expected docs/pr-template.md to include Cómo se ha probado",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Riesgos",
+        "Expected docs/pr-template.md to include Riesgos",
+    )
+    count = commit_count_since_base()
+    if count != 1:
+        fail(f"Expected PR template branch to end as 1 commit over main, found {count}")
+    ok("PR template branch contains exactly one commit over main")
+    assert_max_changed_files(3)
+
+
+def validate_review_cleanup() -> None:
+    assert_file_exists("docs/review-workflow.md")
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"funcional",
+        "Expected review workflow to mention functional feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"naming",
+        "Expected review workflow to mention naming feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"diseñ|disen",
+        "Expected review workflow to mention design feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"pytest\s+-q",
+        "Expected review workflow to mention pytest -q",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"validate\.py",
+        "Expected review workflow to mention validate.py",
+    )
+    assert_no_text(
+        "docs/review-workflow.md",
+        r"(^|\n)##\s+Notes\b",
+        "docs/review-workflow.md must not keep the old Notes heading",
+    )
+    count = commit_count_since_base()
+    if count != 1:
+        fail(f"Expected review cleanup branch to end as 1 commit over main, found {count}")
+    ok("Review cleanup branch contains exactly one commit over main")
+    assert_commit_messages_absent(r"address review comments", "No Address review comments commit remains")
+    assert_max_changed_files(3)
+
+
 def validate_tax() -> None:
     assert_function("app/calculator.py", "calculate_tax")
-    assert_test_contains("calculate_tax")
+    assert_test_function("test_calculate_tax", "calculate_tax")
+    assert_python_result("calculate_tax(100, 0.21)", "21.0")
+
+
+def validate_calculator_names() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_function("app/calculator.py", "subtract")
+    assert_function_args("app/calculator.py", "add", ["left", "right"])
+    assert_function_args("app/calculator.py", "subtract", ["left", "right"])
+    assert_python_result("add(2, 3)", "5")
+    assert_python_result("subtract(5, 3)", "2")
+
+
+def validate_final_incident() -> None:
+    assert_file_absent("release-blocker.txt")
+    count = commit_count_since_base()
+    if count < 2:
+        fail(f"Expected final incident branch to contain at least 2 commits over main, found {count}")
+    ok("Final incident branch contains at least two commits over main")
+    messages = commit_messages_since_base()
+    if not any(re.search(r"\brevert\b", message, re.IGNORECASE) for message in messages):
+        fail(f"Expected at least one revert commit message, found: {messages}")
+    ok("Revert commit message found")
 
 
 EXERCISE_VALIDATORS = {
-    "feature/multiply-operation": validate_multiply,
+    "feature/multiply": validate_multiply,
+    "feature/exponentiation": validate_exponentiation,
     "feature/divide-operation": validate_divide,
+    "feature/modulus-operation": validate_modulus,
     "hotfix/division-by-zero": validate_division_by_zero,
+    "feature/add-cast-int": validate_add_cast_int,
+    "feature/add-none-validation": validate_add_none_validation,
     "feature/clean-history": validate_clean_history,
     "feature/squash-demo": validate_squash_demo,
     "feature/fixup-demo": validate_fixup_demo,
+    "feature/recovery-sandbox": validate_recovery_sandbox,
+    "rescue/reflog": validate_reflog_rescue,
+    "chore/revert-demo": validate_revert_demo,
+    "feature/pr-template": validate_pr_template,
+    "feature/review-cleanup": validate_review_cleanup,
     "feature/tax-calculation": validate_tax,
+    "refactor/calculator-names": validate_calculator_names,
+    "chore/final-incident": validate_final_incident,
 }
+
+
+def branch_validator(branch: str):
+    for expected_branch, validator in EXERCISE_VALIDATORS.items():
+        if branch == expected_branch or branch.startswith(f"{expected_branch}-"):
+            return validator
+    return None
 
 
 def main() -> int:
     branch = current_branch()
     print(f"🔎 Validating branch: {branch}")
     generic_checks()
-    validator = EXERCISE_VALIDATORS.get(branch)
+    validator = branch_validator(branch)
     if validator is None:
         print("ℹ️ No branch-specific kata validator for this branch. Running generic checks only.")
         return 0
