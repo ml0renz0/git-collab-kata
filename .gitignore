@@ -9,3 +9,7 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+docs/solutions.md
+docs/answers.md
+solutions.md
+answers.md

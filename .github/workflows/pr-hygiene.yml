@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - main
+      - 'main-**'
+      - 'release/**'
 
 permissions:
   contents: read
@@ -26,8 +28,8 @@ jobs:
           set -euo pipefail
           echo "Head branch: ${GITHUB_HEAD_REF}"
           case "${GITHUB_HEAD_REF}" in
-            feature/*|hotfix/*|refactor/*|chore/*) ;;
-            *) echo "Branch must start with feature/, hotfix/, refactor/ or chore/" >&2; exit 1 ;;
+            feature/*|hotfix/*|refactor/*|chore/*|rescue/*|release/*) ;;
+            *) echo "Branch must start with feature/, hotfix/, refactor/, chore/, rescue/ or release/" >&2; exit 1 ;;
           esac
 
           files_changed=$(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | wc -l | tr -d ' ')
@@ -37,10 +39,10 @@ jobs:
             exit 1
           fi
 
-      - name: Reject solution folders
+      - name: Reject solution files
         run: |
           set -euo pipefail
-          if git ls-files | grep -E '^(solutions|answers)/'; then
-            echo "Do not commit solutions/ or answers/ directories." >&2
+          if git ls-files | grep -E '^(solutions|answers)/|^(docs/)?(solutions|answers)\.md$'; then
+            echo "Do not commit solution or answer files." >&2
             exit 1
           fi

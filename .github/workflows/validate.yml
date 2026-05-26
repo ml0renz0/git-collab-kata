@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - main
+      - 'main-**'
       - 'feature/**'
       - 'hotfix/**'
+      - 'chore/**'
+      - 'rescue/**'
       - 'refactor/**'
+      - 'release/**'
   pull_request:
     branches:
       - main
+      - 'main-**'
+      - 'release/**'
 
 permissions:
   contents: read
@@ -24,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
