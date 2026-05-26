@@ -93,6 +93,60 @@ def assert_test_contains(test_name: str) -> None:
     ok(f"Tests reference {test_name!r}")
 
 
+def assert_test_function(name: str, required_text: str | None = None) -> None:
+    test_files = [p for p in tracked_files() if p.startswith("tests/") and p.endswith(".py")]
+    for path in test_files:
+        tree = parse_module(path)
+        for node in tree.body:
+            if not isinstance(node, ast.FunctionDef) or node.name != name:
+                continue
+            if required_text is not None:
+                references = any(
+                    isinstance(child, ast.Name) and child.id == required_text
+                    or isinstance(child, ast.Attribute) and child.attr == required_text
+                    for child in ast.walk(node)
+                )
+                if not references:
+                    fail(f"Expected test {name!r} to exercise {required_text!r}")
+            ok(f"Test function {name!r} exists")
+            return
+    fail(f"Expected test function {name!r} in tests/")
+
+
+def assert_python_result(expression: str, expected: str) -> None:
+    result = run([sys.executable, "-c", f"from app.calculator import *; print({expression})"], check=False)
+    actual = result.stdout.strip()
+    if result.returncode != 0 or actual != expected:
+        detail = result.stderr.strip() or actual or f"exit code {result.returncode}"
+        fail(f"Expected {expression} to print {expected!r}; got {detail!r}")
+    ok(f"{expression} returns {expected}")
+
+
+def assert_python_raises(expression: str, expected_exception: str) -> None:
+    code = f"""
+from app.calculator import *
+
+try:
+    {expression}
+except {expected_exception}:
+    pass
+else:
+    raise AssertionError("Expected {expected_exception}")
+"""
+    result = run([sys.executable, "-c", code], check=False)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or f"exit code {result.returncode}"
+        fail(f"Expected {expression} to raise {expected_exception}; got {detail!r}")
+    ok(f"{expression} raises {expected_exception}")
+
+
+def assert_tests_match(pattern: str, description: str) -> None:
+    tests = "\n".join(read(p) for p in tracked_files() if p.startswith("tests/") and p.endswith(".py"))
+    if not re.search(pattern, tests, re.IGNORECASE | re.DOTALL):
+        fail(description)
+    ok(description.replace("Expected", "Found"))
+
+
 def commit_messages_since_base(base: str = "origin/main") -> list[str]:
     result = run(["git", "log", "--format=%s", f"{base}..HEAD"], check=False)
     if result.returncode != 0:
@@ -140,22 +194,51 @@ def generic_checks() -> None:
 
 def validate_multiply() -> None:
     assert_function("app/calculator.py", "multiply")
-    assert_test_contains("multiply")
+    assert_test_function("test_multiply", "multiply")
+    assert_python_result("multiply(2, 3)", "6")
     assert_no_text("app/calculator.py", r"print\(", "calculator.py must not contain debug print calls")
 
 
 def validate_divide() -> None:
     assert_function("app/calculator.py", "divide")
-    assert_test_contains("divide")
+    assert_test_function("test_divide", "divide")
+    assert_python_result("divide(10, 2)", "5.0")
+
+
+def validate_modulus() -> None:
+    assert_function("app/calculator.py", "divide")
+    assert_function("app/calculator.py", "modulus")
+    assert_test_function("test_divide", "divide")
+    assert_test_function("test_modulus", "modulus")
+    assert_python_result("divide(10, 2)", "5.0")
+    assert_python_result("modulus(10, 3)", "1")
+
+
+def validate_exponentiation() -> None:
+    assert_function("app/calculator.py", "exponentiation")
+    assert_test_function("test_exponentiation", "exponentiation")
+    assert_python_result("exponentiation(2, 3)", "8")
+    assert_no_text("app/calculator.py", r"print\(", "calculator.py must not contain debug print calls")
 
 
 def validate_division_by_zero() -> None:
     assert_function("app/calculator.py", "divide")
-    code = read("app/calculator.py")
-    if "ZeroDivisionError" not in code and "ValueError" not in code:
-        fail("divide should explicitly handle division by zero with a clear exception")
-    ok("divide handles division by zero explicitly")
-    assert_test_contains("zero")
+    assert_python_result("divide(10, 2)", "5.0")
+    assert_python_raises("divide(10, 0)", "ZeroDivisionError")
+    assert_tests_match(r"zero", "Expected tests to cover division by zero")
+
+
+def validate_add_cast_int() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_python_result("add('2', '3')", "5")
+    assert_tests_match(r"add\s*\(\s*['\"]2['\"]\s*,\s*['\"]3['\"]\s*\)", "Expected tests to cover add casting string inputs")
+
+
+def validate_add_none_validation() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_python_result("add('2', '3')", "5")
+    assert_python_raises("add(None, 3)", "ValueError")
+    assert_tests_match(r"add\s*\(\s*None\s*,\s*3\s*\)", "Expected tests to cover add rejecting None")
 
 
 def validate_clean_history() -> None:
@@ -189,9 +272,13 @@ def validate_tax() -> None:
 
 
 EXERCISE_VALIDATORS = {
-    "feature/multiply-operation": validate_multiply,
+    "feature/multiply": validate_multiply,
+    "feature/exponentiation": validate_exponentiation,
     "feature/divide-operation": validate_divide,
+    "feature/modulus-operation": validate_modulus,
     "hotfix/division-by-zero": validate_division_by_zero,
+    "feature/add-cast-int": validate_add_cast_int,
+    "feature/add-none-validation": validate_add_none_validation,
     "feature/clean-history": validate_clean_history,
     "feature/squash-demo": validate_squash_demo,
     "feature/fixup-demo": validate_fixup_demo,
@@ -199,11 +286,18 @@ EXERCISE_VALIDATORS = {
 }
 
 
+def branch_validator(branch: str):
+    for expected_branch, validator in EXERCISE_VALIDATORS.items():
+        if branch == expected_branch or branch.startswith(f"{expected_branch}-"):
+            return validator
+    return None
+
+
 def main() -> int:
     branch = current_branch()
     print(f"🔎 Validating branch: {branch}")
     generic_checks()
-    validator = EXERCISE_VALIDATORS.get(branch)
+    validator = branch_validator(branch)
     if validator is None:
         print("ℹ️ No branch-specific kata validator for this branch. Running generic checks only.")
         return 0

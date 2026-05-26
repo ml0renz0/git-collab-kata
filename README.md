@@ -2,7 +2,7 @@
 
 Repositorio para impartir un curso práctico de Git colaborativo avanzado.
 
-La idea es que el repo **no contiene soluciones**. Los alumnos trabajan en ramas con nombres concretos y GitHub Actions valida el resultado observable: tests, forma de la rama, historial, ausencia de secretos y algunos criterios específicos del ejercicio.
+La idea es que los ejercicios no publiquen soluciones paso a paso. Los alumnos trabajan en ramas con nombres concretos y la validación comprueba el resultado observable: tests, forma de la rama, historial, ausencia de secretos y algunos criterios específicos del ejercicio.
 
 ## Requisitos
 
@@ -27,10 +27,25 @@ python scripts/validate.py
 
 1. El instructor crea el repositorio remoto.
 2. Cada alumno clona el repo.
-3. Cada ejercicio indica una rama esperada, por ejemplo `feature/multiply-operation`.
-4. El alumno hace cambios, commits y abre PR contra `main`.
-5. Los workflows validan el resultado.
-6. Si falla, el alumno debe leer el error y corregir su rama.
+3. Cada alumno crea su rama principal de trabajo, por ejemplo `main-anapascual`.
+4. Cada ejercicio indica una rama esperada, normalmente con sufijo de usuario, por ejemplo `feature/multiply-anapascual`.
+5. El alumno hace cambios, commits y abre PR contra su rama `main-<username>`.
+6. Los workflows y `scripts/validate.py` validan el resultado observable.
+7. Si falla, el alumno debe leer el error y corregir su rama.
+
+Convención recomendada para evitar choques entre participantes:
+
+```bash
+USER_ID="<username>"
+MAIN="main-${USER_ID}"
+
+git switch main
+git pull --ff-only
+git switch -c "$MAIN"
+git push -u origin "$MAIN"
+```
+
+Después, cada feature se crea desde `$MAIN` y se abre contra `$MAIN`, no contra `main`, salvo que el ejercicio indique explícitamente otra cosa.
 
 ## Workflows incluidos
 
@@ -38,11 +53,13 @@ python scripts/validate.py
   - Ejecuta tests.
   - Ejecuta `scripts/validate.py`.
   - Usa `fetch-depth: 0` para poder validar historial.
+  - Se ejecuta en pushes a `main`, `feature/**`, `hotfix/**` y `refactor/**`, y en PRs contra `main`.
 
 - `.github/workflows/pr-hygiene.yml`
   - Valida naming de rama.
   - Rechaza PRs demasiado grandes para el kata.
   - Rechaza carpetas `solutions/` o `answers/`.
+  - Se ejecuta en PRs contra `main`. Si quieres que también valide PRs contra ramas `main-<username>`, ajusta el filtro `pull_request.branches` del workflow.
 
 ## Ejercicios
 
@@ -62,15 +79,27 @@ Ver [`docs/cheatsheet.md`](docs/cheatsheet.md).
 
 ## Convención de ramas del kata
 
+`scripts/validate.py` acepta el nombre base o el mismo nombre con sufijo de usuario. Por ejemplo, `feature/multiply` y `feature/multiply-anapascual` activan la misma validación.
+
 | Ejercicio | Rama esperada | Validación específica |
 |---|---|---|
-| Staging parcial | `feature/multiply-operation` | Existe `multiply`, hay test, no hay `print` de debug |
-| Rama básica | `feature/divide-operation` | Existe `divide`, hay test |
-| Hotfix | `hotfix/division-by-zero` | `divide` gestiona división por cero, hay test |
+| 1A Staging parcial | `feature/multiply-<username>` | Existe `multiply`, hay `test_multiply`, no hay `print` de debug |
+| 1B Fix mezclado con commit original | `feature/exponentiation-<username>` | Existe `exponentiation`, hay `test_exponentiation`, no hay `print` de debug |
+| 2A Rama básica con upstream | `feature/divide-operation-<username>` | Existe `divide`, hay `test_divide` |
+| 2B Rama desactualizada con conflicto | `feature/modulus-operation-<username>` | Existen `divide` y `modulus`, hay `test_divide` y `test_modulus` |
+| 3A Hotfix | `hotfix/division-by-zero-<username>` | `divide` lanza `ZeroDivisionError`, hay test con referencia a `zero` |
+| 3B Conflicto Persona A | `feature/add-cast-int-<username>` | `add("2", "3")` devuelve `5`, hay test |
+| 3B Conflicto Persona B | `feature/add-none-validation-<username>` | `add` rechaza `None`, conserva casteo a `int`, hay test |
 | Historial limpio | `feature/clean-history` | Un solo commit sobre `main`, existe `docs/usage.md`, no existe `temp.txt` |
 | Squash | `feature/squash-demo` | Un solo commit sobre `main`, existe `docs/squash.md` |
 | Fixup/autosquash | `feature/fixup-demo` | Un solo commit sobre `main`, existe `docs/api.md` |
 | Simulación final | `feature/tax-calculation` | Existe `calculate_tax`, hay test |
+
+## Entrega final
+
+- Para cada ejercicio, la kata tiene una parte de demo para la presentación y una parte de entrega para completar después.
+- Usa el formulario de issue de GitHub `Entrega Kata Git Colab` para entregar tu rama, tu PR y responder el cuestionario final.
+- El formulario incluye preguntas tipo test basadas en cada ejercicio y un campo para tu aprendizaje clave.
 
 ## Filosofía
 
