@@ -1,0 +1,273 @@
+name: "Entrega Kata Git Colab"
+description: "Entrega la kata mediante un issue con tu rama principal y un cuestionario de buenas prácticas."
+title: "Entrega Kata Git Colab - <username>"
+labels:
+  - entrega
+  - kata
+  - cuestionario
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por completar la kata. Crea un issue de entrega al final del kata con tu rama principal y responde estas 18 preguntas integradoras.
+
+        El objetivo del cuestionario no es recordar nombres concretos de ejercicios, sino explicar buenas prácticas transferibles de trabajo con Git.
+
+        Los PRs se pueden trazar filtrando por la rama destino, por ejemplo `is:pr base:main-anapascual`.
+
+        Nota: los issues de GitHub son visibles para las personas con acceso al repositorio. Si el cuestionario debe ser privado o evaluable, entrégalo por el canal indicado por el instructor.
+  - type: input
+    id: main-branch
+    attributes:
+      label: "Rama principal de trabajo"
+      description: "Nombre de tu rama principal personal. Los PRs del kata deben haberse abierto contra esta rama."
+      placeholder: "main-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q01-branching-traceability
+    attributes:
+      label: "1. Ramas, trazabilidad y aislamiento"
+      description: "Marca prácticas que reducen interferencias entre personas y facilitan revisar una entrega."
+      multiple: true
+      options:
+        - "Empujar directamente a una rama compartida para evitar crear PRs pequeños."
+        - "Mantener nombres de rama consistentes con la convención del equipo o del validador."
+        - "Abrir cada PR contra la rama base correcta, no contra la rama global por costumbre."
+        - "Crear una rama principal personal o aislada cuando varias personas practican en el mismo repo."
+        - "Cambiar el prefijo de la rama libremente si el contenido del cambio parece equivalente."
+        - "Integrar PRs terminados con una estrategia acordada, por ejemplo `Squash and merge`."
+    validations:
+      required: true
+  - type: dropdown
+    id: q02-commit-preparation
+    attributes:
+      label: "2. Preparar un commit limpio"
+      description: "Tienes cambios útiles mezclados con pruebas temporales. ¿Qué acciones ayudan a crear un commit revisable?"
+      multiple: true
+      options:
+        - "Revisar con `git status` qué está modificado, staged o sin seguimiento."
+        - "Añadir todo con `git add .` y confiar en que el reviewer encuentre el ruido."
+        - "Usar `git add -p` cuando solo parte de un archivo pertenece al commit."
+        - "Comprobar `git diff --staged` antes de confirmar."
+        - "Apartar cambios temporales con `stash` cuando no deben entrar todavía."
+        - "Dejar trazas de debug si ayudaron durante el desarrollo local."
+    validations:
+      required: true
+  - type: dropdown
+    id: q03-rewrite-published-branch
+    attributes:
+      label: "3. Reescribir una rama publicada"
+      description: "Has publicado una rama propia y necesitas limpiar commits antes de pedir review. ¿Qué enfoque es más seguro?"
+      options:
+        - "Hacer `git push -f` cuanto antes para que nadie pueda basarse en la versión antigua."
+        - "Añadir un commit final llamado `cleanup` y no tocar la historia previa."
+        - "Usar rebase interactivo, ejecutar pruebas, revisar la diferencia con la versión publicada y empujar con `--force-with-lease`."
+        - "Ejecutar `git reset --hard origin/main`, rehacer el trabajo manualmente y abrir otro PR."
+    validations:
+      required: true
+  - type: dropdown
+    id: q04-update-stale-branch
+    attributes:
+      label: "4. Actualizar una rama desactualizada"
+      description: "Una rama de trabajo quedó por detrás de su rama base. Marca buenas prácticas al actualizarla."
+      multiple: true
+      options:
+        - "Resolver conflictos eligiendo siempre `ours` para proteger tu rama."
+        - "Traer referencias remotas con `git fetch` antes de integrar cambios de la base."
+        - "Seguir la política del equipo: rebase para ramas cortas propias o merge cuando se quiera preservar historia de integración."
+        - "Después de resolver conflictos, revisar que se conservaron las intenciones de ambas ramas."
+        - "Ejecutar pruebas y validación antes de empujar la rama actualizada."
+        - "Borrar el trabajo de la rama base si hace más sencillo que el PR pase."
+        - "Si un rebase reescribe una rama ya publicada, actualizar con `git push --force-with-lease`."
+    validations:
+      required: true
+  - type: dropdown
+    id: q05-rebase-merge-criteria
+    attributes:
+      label: "5. Elegir entre rebase y merge"
+      description: "¿Qué criterio general es más sano?"
+      options:
+        - "Usar siempre merge porque rebase solo sirve para repositorios locales sin remoto."
+        - "Usar rebase para ordenar trabajo propio de corta vida y merge cuando se quiera conservar explícitamente una integración; evitar reescribir historia compartida."
+        - "Usar siempre rebase, incluso sobre ramas compartidas que otras personas ya usan como base."
+        - "Elegir al azar: si el resultado compila, la forma del historial no importa."
+    validations:
+      required: true
+  - type: dropdown
+    id: q06-conflict-resolution
+    attributes:
+      label: "6. Resolver conflictos sin perder intención"
+      description: "Durante una integración, dos ramas modifican la misma zona. ¿Qué comportamientos son buenos?"
+      multiple: true
+      options:
+        - "Eliminar uno de los cambios para terminar el conflicto rápido y confiar en que los tests lo cubran."
+        - "Leer ambos lados del conflicto y entender qué intención aporta cada uno."
+        - "Conservar los comportamientos válidos de ambas ramas siempre que no sean incompatibles."
+        - "Revisar el diff final después de resolver, no solo quitar marcadores `<<<<<<<`."
+        - "Ejecutar tests que cubran tanto el comportamiento previo como el nuevo."
+        - "Resolver todos los conflictos con `theirs` si la rama base entró primero."
+    validations:
+      required: true
+  - type: dropdown
+    id: q07-review-readiness
+    attributes:
+      label: "7. Rama lista para review"
+      description: "Antes de pedir review, ¿qué señales indican que la rama está en buen estado?"
+      multiple: true
+      options:
+        - "El diff del PR se ha revisado desde la perspectiva de otra persona."
+        - "Quedan commits `wip` porque muestran honestamente el proceso de trabajo."
+        - "Los commits finales cuentan unidades de intención comprensibles."
+        - "No hay secretos, archivos temporales ni trazas locales accidentalmente trackeadas."
+        - "La descripción explica cambio, motivo, pruebas y riesgos."
+        - "El PR es grande pero incluye una frase pidiendo paciencia al reviewer."
+        - "Las pruebas relevantes pasan en la rama que se va a revisar."
+    validations:
+      required: true
+  - type: dropdown
+    id: q08-squash-fixup-autosquash
+    attributes:
+      label: "8. Squash, fixup y autosquash"
+      description: "¿Qué práctica describe mejor su uso?"
+      options:
+        - "`fixup` debe usarse para revertir cambios ya publicados en una rama compartida."
+        - "`autosquash` evita revisar el resultado porque Git ordena todo correctamente."
+        - "`squash` y `fixup` solo cambian el mensaje del último commit, no la historia."
+        - "`fixup` agrupa correcciones pequeñas descartando su mensaje; `squash` permite combinar cambios conservando o editando mensajes."
+    validations:
+      required: true
+  - type: dropdown
+    id: q09-local-recovery
+    attributes:
+      label: "9. Recuperación local y limpieza"
+      description: "Marca usos prudentes de comandos de recuperación local."
+      multiple: true
+      options:
+        - "`git clean -fd` es seguro como primer comando porque solo afecta a archivos sin seguimiento."
+        - "`git restore --staged` sirve para sacar cambios del stage sin borrar el archivo."
+        - "`git reflog` puede ayudar a encontrar commits que ya no aparecen en `git log` normal."
+        - "`git clean -n` permite previsualizar qué se borraría antes de limpiar."
+        - "`git restore` puede descartar cambios no deseados del árbol de trabajo."
+        - "`git reset --hard` es la forma recomendada de deshacer cambios compartidos en remoto."
+    validations:
+      required: true
+  - type: dropdown
+    id: q10-undo-shared-history
+    attributes:
+      label: "10. Deshacer cambios locales frente a compartidos"
+      description: "¿Qué criterio aplicarías?"
+      options:
+        - "Usar `git clean` para deshacer commits compartidos y `git revert` para borrar archivos sin seguimiento."
+        - "Usar `revert` para crear un nuevo commit que deshace cambios compartidos; reservar `reset`/`restore` para trabajo local con cuidado."
+        - "Usar `reset --hard` sobre la rama compartida y empujar con fuerza para que todo el equipo vuelva atrás."
+        - "Copiar manualmente el contenido antiguo y no dejar rastro en el historial."
+    validations:
+      required: true
+  - type: dropdown
+    id: q11-review-practices
+    attributes:
+      label: "11. Buenas prácticas de PR y review"
+      description: "Marca prácticas que mejoran la revisión."
+      multiple: true
+      options:
+        - "Responder preguntas de diseño en la conversación, aunque también cambies código o documentación."
+        - "Ocultar riesgos conocidos para no bloquear el merge."
+        - "Mantener PRs pequeños o justificar claramente por qué no pueden serlo."
+        - "Incluir evidencia de pruebas ejecutadas."
+        - "Aceptar todos los comentarios sin comprobar el impacto final."
+        - "Durante review, permitir commits incrementales y limpiar la historia final si la política del equipo lo pide."
+        - "Separar comentarios bloqueantes de preguntas o sugerencias no bloqueantes."
+    validations:
+      required: true
+  - type: dropdown
+    id: q12-range-diff
+    attributes:
+      label: "12. Comparar una rama reescrita"
+      description: "¿Para qué sirve `git range-diff` en una rama publicada que limpiaste con rebase?"
+      options:
+        - "Para convertir automáticamente varios commits en un único squash merge."
+        - "Para borrar del remoto los commits antiguos sin necesidad de push."
+        - "Para comparar la serie de commits anterior con la nueva y comprobar que la intención final no cambió."
+        - "Para resolver conflictos de contenido sin abrir los archivos."
+    validations:
+      required: true
+  - type: dropdown
+    id: q13-integration-release-order
+    attributes:
+      label: "13. Orden de integración y release"
+      description: "En un equipo con una incidencia urgente, una feature abierta y un refactor pendiente, ¿qué orden es más responsable?"
+      options:
+        - "Etiquetar primero la release para tener un punto fijo y resolver después los fallos conocidos."
+        - "Integrar primero el refactor porque cambia menos comportamiento, aunque la incidencia siga abierta."
+        - "Fusionar todo a la vez para reducir el número de PRs."
+        - "Integrar el hotfix, actualizar las ramas abiertas sobre la nueva base, validar, integrar cambios restantes y etiquetar solo un estado probado."
+    validations:
+      required: true
+  - type: dropdown
+    id: q14-refactor-safety
+    attributes:
+      label: "14. Refactor seguro"
+      description: "¿Qué prácticas ayudan a demostrar que un refactor no cambió comportamiento?"
+      multiple: true
+      options:
+        - "Mezclar el refactor con una mejora funcional pequeña para que el PR aporte más valor."
+        - "Mantener el diff centrado en nombres, estructura o extracción, no en reglas de negocio."
+        - "Ejecutar tests existentes y añadir tests si descubres un comportamiento no cubierto."
+        - "Conservar invariantes y comportamientos observables previos."
+        - "Explicar en el PR por qué el cambio debería ser de comportamiento neutro."
+        - "Eliminar tests antiguos para que no bloqueen el refactor."
+    validations:
+      required: true
+  - type: dropdown
+    id: q15-release-tags
+    attributes:
+      label: "15. Tags y releases"
+      description: "¿Qué describe mejor un buen uso de tags anotados?"
+      options:
+        - "Un tag anotado reemplaza la necesidad de revisar el commit al que apunta."
+        - "Un tag anotado marca un punto auditable de release con metadatos y mensaje, después de validar el estado."
+        - "Un tag anotado debe moverse cada vez que se corrige un bug para que el nombre no cambie."
+        - "Un tag anotado sirve principalmente para borrar ramas antiguas."
+    validations:
+      required: true
+  - type: dropdown
+    id: q16-diagnosis-tools
+    attributes:
+      label: "16. Diagnóstico de regresiones"
+      description: "Marca usos correctos de herramientas de diagnóstico."
+      multiple: true
+      options:
+        - "`git blame` muestra qué commit tocó las líneas actuales, pero no prueba por sí solo la causa raíz."
+        - "`git blame` corrige automáticamente la línea problemática."
+        - "`git bisect run` puede automatizar la búsqueda si existe un comando fiable que distingue bueno/malo."
+        - "`git bisect` debe dejarse activo al terminar para recordar el commit culpable."
+        - "`git log -S` y `git log -G` ayudan a acotar cambios relevantes antes de una búsqueda más larga."
+        - "`git bisect reset` vuelve al estado normal tras la investigación."
+        - "Si el bug ya está compartido, un fix forward puede ser más apropiado que reescribir la historia."
+    validations:
+      required: true
+  - type: dropdown
+    id: q17-maintenance-practices
+    attributes:
+      label: "17. Mantenimiento, backports y merges"
+      description: "Marca buenas prácticas para mantener una rama de release y revertir cambios integrados."
+      multiple: true
+      options:
+        - "Usar `git cherry-pick -x` en un backport para dejar trazabilidad al commit original."
+        - "Revertir un merge commit con `git revert -m 1` cuando se quiere deshacer una rama integrada conservando el primer padre."
+        - "Mezclar toda la rama principal en una release antigua aunque solo se necesite un arreglo pequeño."
+        - "Usar `git worktree` para trabajar en paralelo con una release sin cambiar continuamente el checkout principal."
+        - "Abrir el backport contra la rama de release, no contra la rama principal por inercia."
+        - "Esperar que revertir un merge borre la rama original de todos los clones."
+        - "Comprobar que el cambio experimental desaparece del estado final aunque el merge y su revert queden en la historia."
+    validations:
+      required: true
+  - type: textarea
+    id: q18-learning
+    attributes:
+      label: "18. Reflexión final"
+      description: "Describe una decisión de buenas prácticas que ahora tomarías con más cuidado: qué revisarías, qué comando usarías y qué riesgo evitarías."
+      placeholder: "Ejemplo: antes de reescribir una rama publicada, ahora revisaría..."
+    validations:
+      required: true
