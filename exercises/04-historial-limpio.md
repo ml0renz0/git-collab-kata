@@ -11,9 +11,9 @@ Practicar `rebase -i`, squash, fixup y autosquash.
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/clean-history
+git switch main                        # cambiar a la rama principal
+git pull --ff-only                     # actualizar con fast-forward
+git switch -c feature/clean-history    # crear y cambiar a rama feature clean-history
 ```
 
 ### Tarea
@@ -33,7 +33,7 @@ git switch -c feature/clean-history
 ### Validación
 
 ```bash
-python scripts/validate.py
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```
 
 ---
@@ -43,9 +43,9 @@ python scripts/validate.py
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/squash-demo
+git switch main                      # cambiar a la rama principal
+git pull --ff-only                   # actualizar con fast-forward
+git switch -c feature/squash-demo    # crear y cambiar a rama feature squash
 ```
 
 ### Tarea
@@ -56,7 +56,7 @@ git switch -c feature/squash-demo
 ### Validación
 
 ```bash
-python scripts/validate.py
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```
 
 ---
@@ -66,9 +66,9 @@ python scripts/validate.py
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/fixup-demo
+git switch main                     # cambiar a la rama principal
+git pull --ff-only                  # actualizar con fast-forward
+git switch -c feature/fixup-demo    # crear y cambiar a rama feature fixup
 ```
 
 ### Tarea
@@ -78,12 +78,12 @@ git switch -c feature/fixup-demo
 3. Ejecuta autosquash.
 
 ```bash
-git commit --fixup <hash>
-git rebase -i --autosquash origin/main
+git commit --fixup <hash>                 # crear commit fixup para autosquash
+git rebase -i --autosquash origin/main    # rebasar aplicando autosquash
 ```
 
 ### Validación
 
 ```bash
-python scripts/validate.py
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```

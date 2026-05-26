@@ -20,9 +20,9 @@ Simular una semana de trabajo en 60-90 minutos.
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/tax-calculation
+git switch main                          # cambiar a la rama principal
+git pull --ff-only                       # actualizar con fast-forward
+git switch -c feature/tax-calculation    # crear y cambiar a rama feature tax-calculation
 ```
 
 ### Tarea
@@ -34,8 +34,8 @@ git switch -c feature/tax-calculation
 ### Validación
 
 ```bash
-pytest -q
-python scripts/validate.py
+pytest -q                     # ejecutar tests en modo silencioso
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```
 
 ---
@@ -45,9 +45,9 @@ python scripts/validate.py
 ### Rama sugerida
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c refactor/calculator-names
+git switch main                            # cambiar a la rama principal
+git pull --ff-only                         # actualizar con fast-forward
+git switch -c refactor/calculator-names    # crear y cambiar a rama refactor
 ```
 
 ### Tarea
@@ -61,9 +61,9 @@ Refactorizar nombres o estructura de `app/calculator.py` sin cambiar comportamie
 ### Rama sugerida
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c hotfix/division-by-zero
+git switch main                          # cambiar a la rama principal
+git pull --ff-only                       # actualizar con fast-forward
+git switch -c hotfix/division-by-zero    # crear y cambiar a rama hotfix
 ```
 
 ### Tarea
@@ -83,8 +83,8 @@ El maintainer decide el orden:
 5. Se crea tag.
 
 ```bash
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
+git tag -a v1.0.0 -m "Release v1.0.0"    # crear etiqueta anotada para release
+git push origin v1.0.0                   # empujar etiqueta/release al remoto
 ```
 
 ---
@@ -96,7 +96,7 @@ Se descubre que un commit rompió algo.
 Tarea:
 
 ```bash
-git revert <commit>
-git tag -a v1.0.1 -m "Release hotfix v1.0.1"
-git push origin v1.0.1
+git revert <commit>                             # revertir commit especificado
+git tag -a v1.0.1 -m "Release hotfix v1.0.1"    # crear etiqueta anotada para hotfix
+git push origin v1.0.1                          # empujar etiqueta/release al remoto
 ```

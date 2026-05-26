@@ -11,9 +11,9 @@ Provocar conflictos controlados y resolverlos.
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c hotfix/division-by-zero
+git switch main                          # cambiar a la rama principal
+git pull --ff-only                       # actualizar con fast-forward
+git switch -c hotfix/division-by-zero    # crear y cambiar a rama hotfix
 ```
 
 ### Tarea
@@ -26,8 +26,8 @@ git switch -c hotfix/division-by-zero
 ### Validación
 
 ```bash
-pytest -q
-python scripts/validate.py
+pytest -q                     # ejecutar tests en modo silencioso
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```
 
 ---
@@ -46,12 +46,12 @@ Ambas personas abren PR. Uno entrará primero. El segundo deberá resolver confl
 ### Comandos esperados
 
 ```bash
-git fetch origin
-git rebase origin/main
-git status
-git diff
-git add app/calculator.py
-git rebase --continue
+git fetch origin             # traer cambios desde el remoto
+git rebase origin/main       # rebasar sobre main remoto
+git status                   # mostrar estado del repositorio
+git diff                     # ver cambios sin stage
+git add app/calculator.py    # añadir archivo al stage
+git rebase --continue        # continuar el rebase
 ```
 
 ### Reto
@@ -59,5 +59,5 @@ git rebase --continue
 Abortar y volver a empezar:
 
 ```bash
-git rebase --abort
+git rebase --abort    # cancelar el rebase en curso
 ```

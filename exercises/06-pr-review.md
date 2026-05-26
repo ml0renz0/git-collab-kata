@@ -46,7 +46,7 @@ Practicar PRs pequeños, feedback y limpieza posterior.
 Con commits incrementales, por ejemplo:
 
 ```bash
-git commit -m "Address review comments"
+git commit -m "Address review comments"    # crear commit con mensaje
 ```
 
 ---
@@ -56,10 +56,10 @@ git commit -m "Address review comments"
 Antes de mergear:
 
 ```bash
-git fetch origin
-git log --oneline origin/main..HEAD
-git rebase -i origin/main
-git push --force-with-lease
+git fetch origin                       # traer cambios desde el remoto
+git log --oneline origin/main..HEAD    # ver commits locales no en main
+git rebase -i origin/main              # editar commits antes de rebasar sobre main remoto
+git push --force-with-lease            # empujar forzando de forma segura
 ```
 
 Objetivo:

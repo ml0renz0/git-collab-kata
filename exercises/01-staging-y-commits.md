@@ -11,9 +11,9 @@ Practicar `git add -p`, commits pequeños y `commit --amend`.
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/multiply-operation
+git switch main                             # cambiar a la rama principal
+git pull --ff-only                          # actualizar rama principal con fast-forward
+git switch -c feature/multiply-operation    # crear y cambiar a nueva rama
 ```
 
 ### Escenario
@@ -32,17 +32,17 @@ Has tocado `app/calculator.py` para añadir una operación nueva, pero también 
 ### Comandos obligatorios
 
 ```bash
-git diff
-git add -p
-git diff --staged
-git commit --amend
+git diff                               # ver cambios sin stage
+git add -p                             # añadir cambios interactivos por partes
+git diff --staged                      # ver los cambios que ya están staged
+git commit --amend                     # modificar el último commit
 ```
 
 ### Validación local
 
 ```bash
-pytest -q
-python scripts/validate.py
+pytest -q                              # ejecutar tests en modo silencioso
+python scripts/validate.py             # ejecutar validación local del repositorio
 ```
 
 ### Validación en GitHub

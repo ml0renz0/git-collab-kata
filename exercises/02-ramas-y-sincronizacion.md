@@ -11,9 +11,9 @@ Practicar creación de ramas, upstream, `fetch`, `pull --ff-only` y actualizaci�
 ### Rama esperada
 
 ```bash
-git switch main
-git pull --ff-only
-git switch -c feature/divide-operation
+git switch main                           # cambiar a la rama principal
+git pull --ff-only                        # actualizar con fast-forward
+git switch -c feature/divide-operation    # crear y cambiar a rama feature divide
 ```
 
 ### Tarea
@@ -23,15 +23,15 @@ git switch -c feature/divide-operation
 3. Sube la rama configurando upstream.
 
 ```bash
-git push -u origin feature/divide-operation
+git push -u origin feature/divide-operation    # empujar rama y configurar upstream
 ```
 
 ### Comprobaciones
 
 ```bash
-git branch -vv
-pytest -q
-python scripts/validate.py
+git branch -vv                # mostrar ramas y su upstream
+pytest -q                     # ejecutar tests en modo silencioso
+python scripts/validate.py    # ejecutar validación local del repositorio
 ```
 
 ---
@@ -51,12 +51,12 @@ Mergea un cambio pequeño en `main`, por ejemplo documentación en `README.md`.
 Actualizar su rama sin crear un merge commit innecesario:
 
 ```bash
-git fetch origin
-git rebase origin/main
+git fetch origin          # traer cambios desde el remoto
+git rebase origin/main    # rebasar sobre main remoto
 ```
 
 ### Comprobación
 
 ```bash
-git log --oneline --graph --decorate --all
+git log --oneline --graph --decorate --all    # ver historial compacto con decoraciones
 ```
