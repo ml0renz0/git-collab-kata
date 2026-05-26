@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - 'main-**'
 
 permissions:
   contents: read
@@ -26,8 +27,8 @@ jobs:
           set -euo pipefail
           echo "Head branch: ${GITHUB_HEAD_REF}"
           case "${GITHUB_HEAD_REF}" in
-            feature/*|hotfix/*|refactor/*|chore/*) ;;
-            *) echo "Branch must start with feature/, hotfix/, refactor/ or chore/" >&2; exit 1 ;;
+            feature/*|hotfix/*|refactor/*|chore/*|rescue/*) ;;
+            *) echo "Branch must start with feature/, hotfix/, refactor/, chore/ or rescue/" >&2; exit 1 ;;
           esac
 
           files_changed=$(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" | wc -l | tr -d ' ')
