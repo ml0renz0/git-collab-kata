@@ -6,7 +6,7 @@ this file from a branch and submit a pull request.
 
 
 def add(a, b):
-    return a + b
+    return int(a) + int(b)
 
 
 def subtract(a, b):
