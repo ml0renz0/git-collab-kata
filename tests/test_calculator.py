@@ -1,4 +1,4 @@
-from app.calculator import add, exponentiation, multiply, subtract
+from app.calculator import add, divide, exponentiation, multiply, subtract
 
 
 def test_add():
@@ -15,3 +15,7 @@ def test_multiply():
 
 def test_exponentiation():
     assert exponentiation(2, 3) == 8
+
+
+def test_divide():
+    assert divide(10, 2) == 5
