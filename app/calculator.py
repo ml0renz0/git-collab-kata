@@ -19,3 +19,7 @@ def multiply(a, b):
 
 def exponentiation(base, exponent):
     return base ** exponent
+
+
+def modulus(a, b):
+    return a % b
