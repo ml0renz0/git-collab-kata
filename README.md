@@ -96,6 +96,8 @@ Ver [`docs/cheatsheet.md`](docs/cheatsheet.md).
 | 5A Recuperación sandbox | `feature/recovery-sandbox-<username>` | Existe `docs/recovery.md`, conserva `app/calculator.py`, no existe `debug.conf` |
 | 5B Reflog entregable | `rescue/reflog-<username>` | Existe `important.txt` con contenido recuperado |
 | 5B Revert entregable | `chore/revert-demo-<username>` | No existe `production.txt`, hay commit de revert |
+| 6A PR pequeño | `feature/pr-template-<username>` | Existe `docs/pr-template.md`, contiene los cuatro apartados de PR, un commit y máximo 3 archivos |
+| 6B Review y limpieza | `feature/review-cleanup-<username>` | Existe `docs/review-workflow.md`, recoge feedback funcional/naming/diseño, un commit y sin `Address review comments` |
 | Simulación final | `feature/tax-calculation` | Existe `calculate_tax`, hay test |
 
 ## Entrega final

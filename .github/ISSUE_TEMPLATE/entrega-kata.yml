@@ -23,7 +23,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q1
+    id: q1a
     attributes:
       label: "Ejercicio 1A: ¿Qué comando usaste para seleccionar solo parte del cambio?"
       options:
@@ -34,7 +34,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q1c
+    id: q1b
     attributes:
       label: "Ejercicio 1A: Si quieres recuperar el cambio del debug sin sacarlo del stash, ¿qué comando usas?"
       options:
@@ -45,7 +45,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q1e
+    id: q1c
     attributes:
       label: "Ejercicio 1A: ¿Qué comando usaste para combinar el commit del test con el commit de la función?"
       options:
@@ -56,7 +56,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q1b
+    id: q1d
     attributes:
       label: "Ejercicio 1B: ¿Qué comando se usa para combinar el commit de fix con el commit original?"
       options:
@@ -67,7 +67,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q1d
+    id: q1e
     attributes:
       label: "Ejercicio 1B: Después del rebase interactivo, ¿qué comando usaste para actualizar la rama remota de forma segura?"
       options:
@@ -342,14 +342,69 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q6
+    id: q6a
     attributes:
-      label: "Ejercicio 6: ¿Qué apartados debe incluir la descripción de PR propuesta?"
+      label: "Ejercicio 6A: ¿Qué rama base debe mantener el PR pequeño?"
       options:
+        - "feature/review-cleanup-<username>"
+        - "chore/pr-template-<username>"
+        - "feature/<algo-pequeno>"
+        - "feature/pr-template-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6b
+    attributes:
+      label: "Ejercicio 6A: ¿Qué apartados debe incluir la descripción de PR propuesta?"
+      options:
+        - "Qué cambia, Por qué, Cómo se ha probado, Riesgos"
         - "Resumen, Deploy, Owner"
         - "Branch, Tag, Release"
-        - "Qué cambia, Por qué, Cómo se ha probado, Riesgos"
         - "Archivo, Línea, Commit"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6c
+    attributes:
+      label: "Ejercicio 6A: ¿Cuál es el límite de tamaño del PR de demo?"
+      options:
+        - "Un máximo de 8 archivos, como el workflow general"
+        - "Sin límite si solo cambia documentación"
+        - "Como máximo 3 archivos"
+        - "Exactamente 3 commits"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6d
+    attributes:
+      label: "Ejercicio 6B: ¿Qué tres cosas debe pedir la review cruzada?"
+      options:
+        - "Un tag, una release y un merge commit"
+        - "Un cambio funcional, un cambio de naming y una pregunta de diseño"
+        - "Un reset hard, un reflog y un revert"
+        - "Un cambio secreto, un archivo local y un token"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6e
+    attributes:
+      label: "Ejercicio 6B: Después de limpiar una rama ya publicada con rebase, ¿cómo actualizas el remoto de forma segura?"
+      options:
+        - "git push origin main"
+        - "git pull --ff-only"
+        - "git push -f"
+        - "git push --force-with-lease"
+    validations:
+      required: true
+  - type: dropdown
+    id: q6f
+    attributes:
+      label: "Ejercicio 6B: ¿Cómo debe quedar el historial final antes del merge?"
+      options:
+        - "Un solo commit claro, sin `Address review comments`"
+        - "Dos commits: el borrador y `Address review comments`"
+        - "Un commit `wip` para que la review sea más rápida"
+        - "Un merge commit desde `main`"
     validations:
       required: true
   - type: dropdown

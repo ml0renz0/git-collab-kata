@@ -213,6 +213,32 @@ def commit_count_since_base(base: str | None = None) -> int:
         return 0
 
 
+def changed_files_since_base(base: str | None = None) -> list[str]:
+    base = base or first_existing_base()
+    result = run(["git", "diff", "--name-only", f"{base}...HEAD"], check=False)
+    if result.returncode != 0:
+        result = run(["git", "diff", "--name-only", f"{base}..HEAD"], check=False)
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def assert_max_changed_files(max_files: int) -> None:
+    changed_files = changed_files_since_base()
+    if len(changed_files) > max_files:
+        fail(
+            f"Expected at most {max_files} changed files in the PR, "
+            f"found {len(changed_files)}: {changed_files}"
+        )
+    ok(f"PR changes at most {max_files} files")
+
+
+def assert_commit_messages_absent(pattern: str, description: str) -> None:
+    messages = commit_messages_since_base()
+    offenders = [message for message in messages if re.search(pattern, message, re.IGNORECASE)]
+    if offenders:
+        fail(f"{description}: {offenders}")
+    ok(description)
+
+
 def generic_checks() -> None:
     forbidden = []
     for file in tracked_files():
@@ -340,6 +366,75 @@ def validate_revert_demo() -> None:
     ok("Revert commit message found")
 
 
+def validate_pr_template() -> None:
+    assert_file_exists("docs/pr-template.md")
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Qu[eé]\s+cambia",
+        "Expected docs/pr-template.md to include Qué cambia",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Por\s+qu[eé]",
+        "Expected docs/pr-template.md to include Por qué",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+C[oó]mo\s+se\s+ha\s+probado",
+        "Expected docs/pr-template.md to include Cómo se ha probado",
+    )
+    assert_file_contains(
+        "docs/pr-template.md",
+        r"##\s+Riesgos",
+        "Expected docs/pr-template.md to include Riesgos",
+    )
+    count = commit_count_since_base()
+    if count != 1:
+        fail(f"Expected PR template branch to end as 1 commit over main, found {count}")
+    ok("PR template branch contains exactly one commit over main")
+    assert_max_changed_files(3)
+
+
+def validate_review_cleanup() -> None:
+    assert_file_exists("docs/review-workflow.md")
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"funcional",
+        "Expected review workflow to mention functional feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"naming",
+        "Expected review workflow to mention naming feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"diseñ|disen",
+        "Expected review workflow to mention design feedback",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"pytest\s+-q",
+        "Expected review workflow to mention pytest -q",
+    )
+    assert_file_contains(
+        "docs/review-workflow.md",
+        r"validate\.py",
+        "Expected review workflow to mention validate.py",
+    )
+    assert_no_text(
+        "docs/review-workflow.md",
+        r"(^|\n)##\s+Notes\b",
+        "docs/review-workflow.md must not keep the old Notes heading",
+    )
+    count = commit_count_since_base()
+    if count != 1:
+        fail(f"Expected review cleanup branch to end as 1 commit over main, found {count}")
+    ok("Review cleanup branch contains exactly one commit over main")
+    assert_commit_messages_absent(r"address review comments", "No Address review comments commit remains")
+    assert_max_changed_files(3)
+
+
 def validate_tax() -> None:
     assert_function("app/calculator.py", "calculate_tax")
     assert_test_contains("calculate_tax")
@@ -359,6 +454,8 @@ EXERCISE_VALIDATORS = {
     "feature/recovery-sandbox": validate_recovery_sandbox,
     "rescue/reflog": validate_reflog_rescue,
     "chore/revert-demo": validate_revert_demo,
+    "feature/pr-template": validate_pr_template,
+    "feature/review-cleanup": validate_review_cleanup,
     "feature/tax-calculation": validate_tax,
 }
 
