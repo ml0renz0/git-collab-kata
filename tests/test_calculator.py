@@ -1,6 +1,6 @@
 import pytest
 
-from app.calculator import add, divide, subtract
+from app.calculator import add, calculate_tax, divide, subtract
 
 
 def test_add():
@@ -18,3 +18,7 @@ def test_divide():
 def test_divide_by_zero():
     with pytest.raises(ZeroDivisionError):
         divide(10, 0)
+
+
+def test_calculate_tax():
+    assert calculate_tax(100, 0.21) == 21.0
