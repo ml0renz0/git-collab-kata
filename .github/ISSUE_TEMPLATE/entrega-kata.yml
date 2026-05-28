@@ -408,14 +408,58 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: q7
+    id: q7a
     attributes:
-      label: "Ejercicio 7: ¿Por qué usar `git revert <commit>` en un historial compartido?"
+      label: "Ejercicio 7A: ¿Qué rama usa Persona A para la feature funcional?"
       options:
-        - "Mueve HEAD a un commit anterior sin guardar cambios"
-        - "Fusiona la rama actual con main"
-        - "Borra el commit de la historia"
-        - "Crea un nuevo commit que deshace el anterior sin reescribir la historia"
+        - "hotfix/division-by-zero-<username>"
+        - "refactor/calculator-names-<username>"
+        - "feature/tax-calculation-<username>"
+        - "main-<username>"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7b
+    attributes:
+      label: "Ejercicio 7A: Tras integrar el hotfix, ¿cómo actualiza Persona A su feature antes del merge?"
+      options:
+        - "Trae cambios con `git fetch origin` y ejecuta `git rebase \"origin/$MAIN\"`"
+        - "Hace `git reset --hard origin/main`"
+        - "Abre un PR nuevo contra `main`"
+        - "Crea directamente el tag `v1.0.0`"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7c
+    attributes:
+      label: "Ejercicio 7B: Al resolver la integración final, ¿qué debe conservarse?"
+      options:
+        - "Solo el refactor, porque la feature se puede rehacer después"
+        - "Solo los cambios de la rama que entró primero"
+        - "El tag de release, aunque fallen los tests"
+        - "`calculate_tax`, el hotfix de división por cero, los nombres `left`/`right` y los tests"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7d
+    attributes:
+      label: "Ejercicio 7B: ¿Para qué sirve el tag anotado de release?"
+      options:
+        - "Para reemplazar la rama de feature"
+        - "Para marcar un punto concreto de `$MAIN` como versión publicada"
+        - "Para resolver conflictos automáticamente"
+        - "Para borrar los commits temporales del historial"
+    validations:
+      required: true
+  - type: dropdown
+    id: q7e
+    attributes:
+      label: "Ejercicio 7B: ¿Por qué usar `git revert <commit>` en un historial compartido?"
+      options:
+        - "Porque fusiona la rama actual con `main`"
+        - "Porque borra el commit original de todas las copias"
+        - "Porque crea un nuevo commit que deshace otro sin reescribir la historia"
+        - "Porque mueve HEAD a un commit anterior sin guardar cambios"
     validations:
       required: true
   - type: textarea

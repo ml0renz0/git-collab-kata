@@ -98,7 +98,10 @@ Ver [`docs/cheatsheet.md`](docs/cheatsheet.md).
 | 5B Revert entregable | `chore/revert-demo-<username>` | No existe `production.txt`, hay commit de revert |
 | 6A PR pequeño | `feature/pr-template-<username>` | Existe `docs/pr-template.md`, contiene los cuatro apartados de PR, un commit y máximo 3 archivos |
 | 6B Review y limpieza | `feature/review-cleanup-<username>` | Existe `docs/review-workflow.md`, recoge feedback funcional/naming/diseño, un commit y sin `Address review comments` |
-| Simulación final | `feature/tax-calculation` | Existe `calculate_tax`, hay test |
+| 7A Feature final | `feature/tax-calculation-<username>` | Existe `calculate_tax`, hay `test_calculate_tax`, `calculate_tax(100, 0.21)` devuelve `21.0` |
+| 7A Hotfix final | `hotfix/division-by-zero-<username>` | `divide` lanza `ZeroDivisionError`, hay test con referencia a `zero` |
+| 7B Refactor final | `refactor/calculator-names-<username>` | `add` y `subtract` usan parámetros `left`/`right` y conservan comportamiento |
+| 7B Incidente final | `chore/final-incident-<username>` | No existe `release-blocker.txt`, hay commit de revert |
 
 ## Entrega final
 

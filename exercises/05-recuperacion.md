@@ -80,7 +80,7 @@ Estás preparando una nota de recuperación, pero durante una prueba borras un a
 1. Haz un commit solo con `docs/recovery.md`.
 1. Ejecuta `python scripts/validate.py` en la rama `feature/recovery-sandbox-<username>`.
 1. Ejecuta `pytest -q` desde el entorno virtual del proyecto.
-1. Sube la rama configurando upstream con `git push -u origin "$FEATURE_RECOVERY"`.
+1. Sube la rama configurando upstream.
 1. Abre PR desde `$FEATURE_RECOVERY` contra `$MAIN` y combínala.
 
 ### Resultado esperado observable

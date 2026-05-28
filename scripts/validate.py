@@ -104,11 +104,27 @@ def function_names(path: str) -> set[str]:
     return {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
 
 
+def function_arg_names(path: str, name: str) -> list[str]:
+    tree = parse_module(path)
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            args = [*node.args.posonlyargs, *node.args.args]
+            return [arg.arg for arg in args]
+    fail(f"Expected function {name!r} in {path}")
+
+
 def assert_function(path: str, name: str) -> None:
     names = function_names(path)
     if name not in names:
         fail(f"Expected function {name!r} in {path}. Found: {sorted(names)}")
     ok(f"Function {name!r} exists in {path}")
+
+
+def assert_function_args(path: str, name: str, expected: list[str]) -> None:
+    actual = function_arg_names(path, name)
+    if actual[: len(expected)] != expected:
+        fail(f"Expected {name} arguments to start with {expected}, found {actual}")
+    ok(f"Function {name!r} uses expected argument names")
 
 
 def assert_no_text(path: str, pattern: str, description: str) -> None:
@@ -437,7 +453,29 @@ def validate_review_cleanup() -> None:
 
 def validate_tax() -> None:
     assert_function("app/calculator.py", "calculate_tax")
-    assert_test_contains("calculate_tax")
+    assert_test_function("test_calculate_tax", "calculate_tax")
+    assert_python_result("calculate_tax(100, 0.21)", "21.0")
+
+
+def validate_calculator_names() -> None:
+    assert_function("app/calculator.py", "add")
+    assert_function("app/calculator.py", "subtract")
+    assert_function_args("app/calculator.py", "add", ["left", "right"])
+    assert_function_args("app/calculator.py", "subtract", ["left", "right"])
+    assert_python_result("add(2, 3)", "5")
+    assert_python_result("subtract(5, 3)", "2")
+
+
+def validate_final_incident() -> None:
+    assert_file_absent("release-blocker.txt")
+    count = commit_count_since_base()
+    if count < 2:
+        fail(f"Expected final incident branch to contain at least 2 commits over main, found {count}")
+    ok("Final incident branch contains at least two commits over main")
+    messages = commit_messages_since_base()
+    if not any(re.search(r"\brevert\b", message, re.IGNORECASE) for message in messages):
+        fail(f"Expected at least one revert commit message, found: {messages}")
+    ok("Revert commit message found")
 
 
 EXERCISE_VALIDATORS = {
@@ -457,6 +495,8 @@ EXERCISE_VALIDATORS = {
     "feature/pr-template": validate_pr_template,
     "feature/review-cleanup": validate_review_cleanup,
     "feature/tax-calculation": validate_tax,
+    "refactor/calculator-names": validate_calculator_names,
+    "chore/final-incident": validate_final_incident,
 }
 
 
