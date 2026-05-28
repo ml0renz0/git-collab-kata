@@ -5,12 +5,13 @@ this file from a branch and submit a pull request.
 """
 
 
-def add(a, b):
-    return a + b
+def add(left, right):
+    return left + right
 
 
-def subtract(a, b):
-    return a - b
+def subtract(left, right):
+    return left - right
+
 
 def divide(a, b):
     if b == 0:
