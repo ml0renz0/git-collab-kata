@@ -1,6 +1,6 @@
 import pytest
 
-from app.calculator import add, calculate_tax, divide, subtract
+from app.calculator import add, calculate_tax, divide, factorial, subtract
 
 
 def test_add():
@@ -21,3 +21,16 @@ def test_divide_by_zero():
 
 def test_calculate_tax():
     assert calculate_tax(100, 0.21) == 21.0
+
+
+def test_factorial_zero():
+    assert factorial(0) == 1
+
+
+def test_factorial_positive():
+    assert factorial(5) == 120
+
+
+def test_factorial_negative():
+    with pytest.raises(ValueError):
+        factorial(-1)
