@@ -24,6 +24,9 @@ def calculate_tax(amount, rate):
 
 
 def factorial(n):
+    if not isinstance(n, int):
+        raise TypeError("factorial is only defined for integers")
+
     if n < 0:
         raise ValueError("factorial is not defined for negative numbers")
 
