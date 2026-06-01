@@ -23,10 +23,6 @@ def calculate_tax(amount, rate):
     return amount * rate
 
 
-def experimental_discount(amount, rate):
-    return amount - (amount * rate)
-
-
 def factorial(n):
     if not isinstance(n, int):
         raise TypeError("factorial is only defined for integers")

@@ -1,13 +1,6 @@
 import pytest
 
-from app.calculator import (
-    add,
-    calculate_tax,
-    divide,
-    experimental_discount,
-    factorial,
-    subtract,
-)
+from app.calculator import add, calculate_tax, divide, factorial, subtract
 
 
 def test_add():
@@ -28,10 +21,6 @@ def test_divide_by_zero():
 
 def test_calculate_tax():
     assert calculate_tax(100, 0.21) == 21.0
-
-
-def test_experimental_discount():
-    assert experimental_discount(100, 0.10) == 90
 
 
 def test_factorial_zero():
