@@ -34,3 +34,8 @@ def test_factorial_positive():
 def test_factorial_negative():
     with pytest.raises(ValueError):
         factorial(-1)
+
+
+def test_factorial_rejects_non_integer():
+    with pytest.raises(TypeError):
+        factorial(2.5)
