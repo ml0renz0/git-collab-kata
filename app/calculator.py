@@ -15,4 +15,6 @@ def subtract(a, b):
 def multiply(a, b):
     return a * b
 
+def exponentiation(a, b):
+    return a ** b
 
