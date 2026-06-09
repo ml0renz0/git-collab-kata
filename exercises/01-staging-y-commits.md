@@ -7,7 +7,7 @@ Practicar primero `git add -p` y `git stash` para separar cambios mezclados. Des
 ## Demo
 
 - En la presentación resolveremos un flujo completo con `git add -p` y `git stash`.
-- Crearemos un cambio útil (`multiply`) y un cambio temporal de debug, luego usaremos stash para apartar lo que no queremos commitear todavía.
+- Crearemos un cambio útil (`multiply`) y un cambio temporal de debug en una función existente, luego usaremos stash para apartar lo que no queremos commitear todavía.
 - Veremos `git stash push -k -m "debug"`, `git stash list`, `git stash pop` y `git stash drop` para guardar, recuperar o descartar el trabajo temporal según convenga.
 - Separaremos la práctica en dos momentos: primero dejar limpio el árbol de trabajo y después limpiar la historia de la rama.
 
@@ -50,7 +50,7 @@ git switch -c "$FEATURE"  # crear y cambiar a la rama del ejercicio
 
 ### Escenario
 
-Has editado `app/calculator.py` para añadir una operación nueva, pero también metiste una traza de debug que no debería commitearse.
+Has editado `app/calculator.py` para añadir una operación nueva, pero también metiste una traza de debug en una función existente que no debería commitearse.
 
 ### Preguntas de reflexión
 
@@ -64,11 +64,11 @@ Has editado `app/calculator.py` para añadir una operación nueva, pero también
 Parte 1: aislar el cambio útil.
 
 1. Añade una función `multiply` en `app/calculator.py`.
-1. Añade temporalmente un `print` de debug dentro de `multiply` y ejecútalo para probarlo.
-1. Usa `git add -p` para añadir solo la implementación de `multiply`, sin la traza de debug.
-1. Usa `git stash push -k -m "debug"` para guardar en el stash local el debug de `multiply`.
+1. Añade temporalmente un `print` de debug en una función existente, por ejemplo dentro de `add`, y llama a esa función para comprobar que aparece.
+1. Usa `git add -p` para añadir solo la implementación de `multiply`, sin la traza de debug. Si Git muestra ambos cambios en el mismo `hunk`, usa `s` para dividirlo y acepta solo el `hunk` de `multiply`.
+1. Usa `git stash push -k -m "debug"` para guardar en el stash local la traza de debug.
 1. Haz un primer commit incluyendo únicamente la función `multiply`.
-1. Comprueba `git stash list`; si no quieres revisar el cambio de debug usa `git stash drop` para descartarlo, o bien usa `git stash pop` si quieres recuperarlo antes.
+1. Comprueba `git stash list` y `git stash show -p`; si no quieres revisar el cambio de debug usa `git stash drop` para descartarlo, o bien usa `git stash pop` si quieres recuperarlo antes.
 1. Comprueba con `git status` que entiendes qué queda en el árbol de trabajo antes de seguir.
 
 Parte 2: añadir el test y compactar la intención.
@@ -105,19 +105,19 @@ Has editado `app/calculator.py` para añadir una operación nueva, pero también
 - ¿Cuándo tiene sentido usar `commit --amend` y cuándo necesitas un `rebase -i`?
 - Si una rama ya está publicada, ¿qué riesgo aparece al reescribir su historia?
 - ¿Por qué `push --force-with-lease` es más prudente que `push -f`?
-- ¿Qué diferencia hay entre una historia honesta para depurar y una historia limpia para revisar?
+- ¿Qué información pierdes al compactar commits y qué gana la persona que revisa el PR?
 
 ### Práctica individual
 
 1. Implementa la función `exponentiation` en `app/calculator.py`, pero invierte por error los parámetros: usa el primero como exponente y el segundo como base.
-1. Añade un test `test_exponentiation` en `tests/test_calculator.py`.
+1. Añade un test `test_exponentiation` en `tests/test_calculator.py`, pero olvida importar `exponentiation` desde `app.calculator`.
 1. Usa `git add -p` para incluir la implementación de `exponentiation` en el primer commit.
 1. Empuja la rama al remoto con `git push -u origin "$FEATURE"`.
-1. Crea un segundo commit con el test `test_exponentiation`, pero equivócate a propósito y pon un `*` en lugar de dos.
-1. Arregla el commit previo usando `git commit --amend`.
-1. Prueba la función ejecutando: `python -c "from app.calculator import exponentiation ; print(exponentiation(2,3))"` y detecta el problema de parámetros.
-1. Arregla el bug de los parámetros y crea un tercer commit de fix.
-1. Usa `git rebase -i HEAD~3` para combinar el commit de fix con el commit de la función y dejar una historia limpia. Asegúrate de que el test sigue presente y en un commit aparte.
+1. Crea un segundo commit con el test que todavía no importa la nueva función.
+1. Ejecuta `pytest -q`, revisa el fallo, añade `exponentiation` al import de `tests/test_calculator.py`, ejecuta `git add tests/test_calculator.py` y después usa `git commit --amend` para sustituir el segundo commit por su versión corregida.
+1. Prueba la función ejecutando: `python -c "from app.calculator import exponentiation ; print(exponentiation(2,3))"` o `python scripts/validate.py` para detectar el problema de parámetros.
+1. Arregla el bug de los parámetros, ejecuta `git add app/calculator.py` y crea un tercer commit de tipo `fixup` apuntando al commit de la función, por ejemplo con `git commit --fixup <hash-del-commit-de-la-función>`.
+1. Usa `git rebase -i --autosquash HEAD~3` para que Git coloque ese `fixup` junto al commit de la función y deje una historia limpia. Asegúrate de que el test sigue presente y en un commit aparte.
 1. Ejecuta `python scripts/validate.py` en la rama `feature/exponentiation-<username>`.
 1. Como ya habías subido la rama antes del rebase, actualiza el remoto adecuadamente.
 1. Abre PR contra tu rama `$MAIN` y combínala.

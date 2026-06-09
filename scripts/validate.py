@@ -355,6 +355,35 @@ def assert_commit_count(expected: int, description: str) -> None:
     ok(description)
 
 
+def commits_since_base(base: str | None = None) -> list[str]:
+    base = base or first_existing_base()
+    result = run(["git", "rev-list", "--reverse", f"{base}..HEAD"], check=False)
+    if result.returncode != 0:
+        fail(f"Could not inspect commits over base {base!r}: {result.stderr.strip()}")
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def changed_files_in_commit(commit: str) -> set[str]:
+    result = run(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", commit], check=False)
+    if result.returncode != 0:
+        fail(f"Could not inspect changed files for commit {commit}: {result.stderr.strip()}")
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
+def assert_ordered_commit_file_split(first_path: str, second_path: str, description: str) -> None:
+    commits = commits_since_base()
+    if len(commits) != 2:
+        fail(f"{description}: expected exactly 2 commits, found {len(commits)}")
+
+    first_files = changed_files_in_commit(commits[0])
+    second_files = changed_files_in_commit(commits[1])
+    if first_path not in first_files or any(path.startswith("tests/") for path in first_files):
+        fail(f"{description}: first commit should change {first_path} without test files; found {sorted(first_files)}")
+    if second_path not in second_files or first_path in second_files:
+        fail(f"{description}: second commit should change {second_path} without {first_path}; found {sorted(second_files)}")
+    ok(description)
+
+
 def merge_commit_count_since_base(base: str | None = None) -> int:
     base = base or first_existing_base()
     result = run(["git", "rev-list", "--merges", "--count", f"{base}..HEAD"], check=False)
@@ -455,7 +484,11 @@ def validate_exponentiation() -> None:
     assert_test_function("test_exponentiation", "exponentiation")
     assert_python_result("exponentiation(2, 3)", "8")
     assert_no_text("app/calculator.py", r"print\(", "calculator.py must not contain debug print calls")
-    assert_commit_count(2, "Exponentiation branch contains exactly two commits over main")
+    assert_ordered_commit_file_split(
+        "app/calculator.py",
+        "tests/test_calculator.py",
+        "Exponentiation branch has one implementation commit followed by one test commit",
+    )
 
 
 def validate_division_by_zero() -> None:

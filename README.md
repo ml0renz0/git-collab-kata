@@ -87,7 +87,7 @@ Orden sugerido:
 
 El ejercicio 7 funciona como integración de los flujos colaborativos principales. Los ejercicios 8 y 9 son módulos avanzados posteriores para diagnóstico y mantenimiento de releases.
 
-## Chuleta rápida
+## CheatSheet
 
 Ver [`docs/cheatsheet.md`](docs/cheatsheet.md).
 
@@ -98,7 +98,7 @@ Ver [`docs/cheatsheet.md`](docs/cheatsheet.md).
 | Rama base | Enunciado | Validación específica |
 |---|---|---|
 | `feature/multiply` | 01 — Parte A | `multiply`, `test_multiply`, sin `print(` de debug y un commit sobre la base |
-| `feature/exponentiation` | 01 — Parte B | `exponentiation`, `test_exponentiation`, sin `print(` de debug y dos commits sobre la base |
+| `feature/exponentiation` | 01 — Parte B | `exponentiation`, `test_exponentiation`, sin `print(` de debug y dos commits separados: implementación y test |
 | `feature/divide-operation` | 02 — Parte A | `divide`, `test_divide` y resultado esperado para `divide(10, 2)` |
 | `feature/modulus-operation` | 02 — Parte B | `divide`, `modulus`, sus tests, resultados esperados y sin merge commits sobre la base |
 | `hotfix/division-by-zero` | 03 — Parte A | `divide(10, 0)` lanza explícitamente `ZeroDivisionError` y los tests cubren el caso `zero` |
