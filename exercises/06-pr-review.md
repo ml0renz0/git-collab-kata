@@ -27,17 +27,17 @@ Sustituye `<username>` por tu identificador, por ejemplo `anapascual`.
 
 El validador acepta `feature/pr-template`, `feature/review-cleanup` y ramas con esos mismos nombres base más sufijo, como `feature/review-cleanup-anapascual`. No cambies estas ramas a otros nombres.
 
-Si todavía no existe tu rama principal de usuario, créala desde `main`:
+A partir de aquí se asume que tu rama principal de usuario ya se creó en el ejercicio 1. Antes de empezar, cámbiate a ella y actualízala:
 
 ```bash
 USER_ID="<username>"
 MAIN="main-${USER_ID}"
 
-git switch main
+git switch "$MAIN"
 git pull --ff-only
-git switch -c "$MAIN"
-git push -u origin "$MAIN"
 ```
+
+Si estás haciendo este ejercicio de forma aislada y `$MAIN` todavía no existe, créala primero desde `main` siguiendo la convención del ejercicio 1 o del README.
 
 ---
 
