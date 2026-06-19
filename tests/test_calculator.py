@@ -1,3 +1,4 @@
+import pytest
 from app.calculator import add, subtract, divide, modulus, multiply, exponentiation
 
 
@@ -9,6 +10,10 @@ def test_subtract():
 
 def test_divide():
     assert divide(15, 3) == 5
+
+def test_divide_by_zero():
+    with pytest.raises(ZeroDivisionError):
+        divide(10, 0)
 
 def test_modulus():
     assert modulus(9, 2) == 1
