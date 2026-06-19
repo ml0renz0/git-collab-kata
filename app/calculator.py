@@ -13,6 +13,10 @@ def subtract(a, b):
     return a - b
 
 
+def divide(a, b):
+    return a / b
+
+
 def factorial(n):
     if n < 0:
         raise ValueError("factorial is not defined for negative numbers")
