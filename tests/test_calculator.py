@@ -5,6 +5,9 @@ from app.calculator import add, subtract, divide, modulus, multiply, exponentiat
 def test_add():
     assert add(2, 3) == 5
 
+def test_add_casts_string_numbers_to_int():
+    assert add("2", "3") == 5
+
 def test_subtract():
     assert subtract(5, 3) == 2
 
