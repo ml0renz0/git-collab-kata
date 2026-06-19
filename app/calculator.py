@@ -6,6 +6,8 @@ this file from a branch and submit a pull request.
 
 
 def add(a, b):
+    if a is None or b is None:
+        raise ValueError("add does not accept None")
     return int(a) + int(b)
 
 
